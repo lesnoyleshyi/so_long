@@ -36,3 +36,13 @@ clean	:
 
 fclean	:	clean
 			rm -rf ${NAME}
+
+debug	:
+			${CC} ${CFLAGS} -g ${SRCS} -L./libft -lmlx -lft -framework OpenGL \
+                                    			-framework AppKit -o ${NAME}_debug
+
+run		:	${NAME}
+			./${NAME} ./maps/map1.ber
+
+ch_leak	:	${NAME}
+			leaks -atExit -- ./${NAME} ./maps/map1.ber

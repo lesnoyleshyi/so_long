@@ -13,98 +13,103 @@
 #include "mlx/mlx_mms/mlx.h"
 #include <stdio.h>
 #include "libft/libft.h"
+#include <fcntl.h>
+#define	SPRITE_SIZE 60
 
-typedef struct s_data	{
-void	*img;
-char	*addr;
-int		bits_per_pixel;
-int		line_length;
-int		endian;
-}				t_data;
-
-typedef struct s_vars	{
+typedef	struct	s_data	{
 void	*mlx;
 void	*win;
-}				t_vars;
+void	*img;
+}				t_data;
 
-void	my_mlx_pixel_put(t_data *data, int x, int y, int color);
-int		key_hook(int keycode, t_vars *vars);
-int		close_win(int keycode, t_vars *vars);
+typedef struct	s_map	{
+char	*strings;
+int		rows;
+int		cols;
+}				t_map;
 
-int main(void)
+t_map	ft_check_map(const char *path_to_file);
+int		ft_exit_prog(int keycode, t_data *data, void *param);
+int		ft_update_frame(t_data *data, t_map *map);
+
+int main(int argc, char *argv[])
 {
-	void	*mlx;
-	void	*mlx_win;
-//	t_vars	vars;
-//	t_data	image;
-//	t_data	image2;
-	void	*image3;
-	int		image3_width;
-	int 	image3_height;
-	t_vars	img3_vars;
+	t_data	data;
+	t_map	map;
+	int	sprite_x_dim;
+	int	sprite_y_dim;
 
-
-	mlx = mlx_init();
-	mlx_win = mlx_new_window(mlx, 1920, 1080, "so_long game");
-//	vars.mlx = mlx;
-//	vars.win = mlx_win;
-//	image.img = mlx_new_image(mlx, 640, 480);
-//	image.addr = mlx_get_data_addr(image.img, &image.bits_per_pixel, &image.line_length, &image.endian);
-//	my_mlx_pixel_put(&image, 320, 240, 0x00FF0000);
-//	mlx_put_image_to_window(mlx, mlx_win, image.img, 0, 0);
-//	mlx_key_hook(mlx_win, key_hook, &vars);
-//	image2.img = mlx_new_image(mlx, 100, 100);
-//	image2.addr = mlx_get_data_addr(image2.img, &image2.bits_per_pixel, &image2.line_length, &image2.endian);
-//	mlx_loop_hook(mlx, render_some_shit, &image2);
-	img3_vars.mlx = mlx;
-	img3_vars.win = mlx_win;
-	image3 = mlx_xpm_file_to_image(mlx, "./sprites/dildo.xpm", &image3_width, &image3_height);
-	if (image3)
+	if (argc != 2)
 	{
-		mlx_put_image_to_window(mlx, mlx_win, image3, 0, 0);
-		mlx_hook(mlx_win, 2, 1L<<0, close_win, &img3_vars);
-		mlx_loop(mlx);
-	}
-	else
-	{
-		ft_putstr_fd("Dildo hasn't been read :(\n", 27);
+		write(1, "You should provide one map as the first argument\n", 50);
 		return (0);
 	}
-
-//	mlx_hook(mlx_win, 2, 1L<<0, close_win, &vars);
-//	mlx_loop(mlx);
+	map = ft_check_map(argv[1]);
+	data.mlx = mlx_init();
+	data.win = mlx_new_window(data.mlx, map.cols * SPRITE_SIZE, map.rows * SPRITE_SIZE, "omg_so_long_daddy");
+	data.img = mlx_xpm_file_to_image(data.mlx, "./sprites/my_hero.xpm", &sprite_x_dim, &sprite_y_dim);
+//	data.img = mlx_new_image(data.mlx, map.cols * SPRITE_SIZE, map.rows * SPRITE_SIZE);
+	mlx_loop_hook(data.mlx, ft_update_frame, &data);
+	mlx_hook(data.win, 2, 1L<<0, ft_exit_prog, NULL);
+	mlx_loop(data.mlx);
 	return (0);
 }
 
-void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
+t_map	ft_check_map(const char *path_to_file)
 {
-	char	*dst;
+	int		fd;
+	t_map	map;
 
-	dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
-	*(unsigned int*)dst = color;
+	fd = open(path_to_file, O_RDONLY);
+	if (fd == -1)
+	{
+		write(1, "Error\nCan't open file with map\n", 32);
+		exit(0);
+	}
+	map.rows = 5;
+	map.cols = 13;
+	map.strings = "001PE00C";
+	close(fd);
+	return (map);
 }
 
-int		key_hook(int keycode, t_vars *vars)
-{
-	ft_putnbr_fd(keycode, 1);
-	ft_putchar_fd('\n', 1);
-	if (vars->mlx == NULL)
-		return (1);
-	return (0);
-}
-
-int		close_win(int keycode, t_vars *vars)
+int		ft_exit_prog(int keycode, t_data *data, void *param)
 {
 	if (keycode == 53)
 	{
-		mlx_destroy_window(vars->mlx, vars->win);
-		write(1, "Game over, druzhok\n", 20);
-		return (0);
+		param = NULL;
+//		mlx_destroy_window(data->mlx, data->win);
+		free(data->win);
+		free(data->mlx);
+		exit(0);
 	}
-	return (1);
+	return (0);
 }
 
-//int		render_some_shit(void *shit_struct)
-//{
-//	my_mlx_pixel_put()
-//}
+int		ft_update_frame(t_data *data, t_map *map)
+{
+	int	sprite_x_dim;
+	int	sprite_y_dim;
+	void *spr;
+
+	spr = mlx_xpm_file_to_image(data->mlx, "./sprites/my_hero.xpm", &sprite_x_dim, &sprite_y_dim);
+	if (!spr)
+		exit(25);
+//	mlx_put_image_to_window(data->mlx, data->win, spr, 0, 0);
+//	mlx_put_image_to_window(data->mlx, data->win, spr, sprite_x_dim, 0);
+
+	mlx_put_image_to_window(data->mlx, data->win, spr, (map->cols), (map->rows));
+	printf("%d\n%d\n", map->cols, map->rows);
+//  тут мапа не передаётся, надо её в структуру запихурить
+
+//	while (map->cols != 0)
+//	{
+//		mlx_put_image_to_window(data->mlx, data->win, spr, (map->cols) * sprite_x_dim, (map->rows) * sprite_y_dim);
+//		(map->cols)--;
+//	}
+
+	printf("hello\n");
+//	if (map->cols == 0)
+//		return (1);
+	return (0);
+}
