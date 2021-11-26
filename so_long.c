@@ -51,6 +51,10 @@ void	ft_get_sprites(t_data *data);
 t_img	*ft_get_sprite(t_data *data, char *path_to_image);
 int		ft_exit_prog(int keycode, t_data *data);
 void	ft_get_player_pos(t_map *map);
+void	ft_move_up(t_map *map);
+void	ft_move_down(t_map *map);
+void	ft_move_left(t_map *map);
+void	ft_move_right(t_map *map);
 
 int main(int argc, char *argv[])
 {
@@ -66,7 +70,8 @@ int main(int argc, char *argv[])
 	ft_get_sprites(&data);
 	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.player->x_dim,
 							  (data.map->rows) * data.player->y_dim, "so_long");
-	ft_print_map(&data);
+//	ft_print_map(&data);
+	mlx_loop_hook(data.mlx, ft_print_map, &data);
 	mlx_hook(data.win, 2, 1L<<0, ft_exit_prog, &data);
 	mlx_loop(data.mlx);
 	return (0);
@@ -110,11 +115,20 @@ t_map	*ft_check_map(const char *path_to_file)
 
 int		ft_exit_prog(int keycode, t_data *data)
 {
+	if (keycode == 13)
+		ft_move_up(data->map);
+	if (keycode == 1)
+		ft_move_down(data->map);
+	if (keycode == 0)
+		ft_move_left(data->map);
+	if (keycode == 2)
+		ft_move_right(data->map);
 	if (keycode == 53)
 	{
 		mlx_destroy_window(data->mlx, data->win);
 		exit(0);
 	}
+	printf("keycode: %d\n", keycode);
 	return (0);
 }
 
@@ -209,5 +223,83 @@ void	ft_get_player_pos(t_map *map)
 			j++;
 		}
 		i++;
+	}
+}
+
+void	ft_move_up(t_map *map)
+{
+//	printf("Previous pos: [%d][%d]\n", map->pl_pos_x, map->pl_pos_y);
+	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'G' ||
+		map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'g')
+	{
+		exit(0);
+	}
+	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == '1')
+	{
+		return;
+	}
+	else
+	{
+		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
+		map->strings[map->pl_pos_x - 1][map->pl_pos_y] = 'P';
+		map->pl_pos_x -= 1;
+	}
+//	printf("Next pos: [%d][%d]\n", map->pl_pos_x, map->pl_pos_y);
+}
+
+void	ft_move_down(t_map *map)
+{
+	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'G' ||
+		map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'g')
+	{
+		exit(0);
+	}
+	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == '1')
+	{
+		return ;
+	}
+	else
+	{
+		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
+		map->strings[map->pl_pos_x + 1][map->pl_pos_y] = 'P';
+		map->pl_pos_x += 1;
+	}
+}
+
+void	ft_move_left(t_map *map)
+{
+	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'G' ||
+		map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'g')
+	{
+		exit(0);
+	}
+	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == '1')
+	{
+		return ;
+	}
+	else
+	{
+		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
+		map->strings[map->pl_pos_x][map->pl_pos_y - 1] = 'P';
+		map->pl_pos_y -= 1;
+	}
+}
+
+void	ft_move_right(t_map *map)
+{
+	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'G' ||
+		map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'g')
+	{
+		exit(0);
+	}
+	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == '1')
+	{
+		return ;
+	}
+	else
+	{
+		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
+		map->strings[map->pl_pos_x][map->pl_pos_y + 1] = 'P';
+		map->pl_pos_y += 1;
 	}
 }
