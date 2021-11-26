@@ -135,8 +135,6 @@ int		ft_exit_prog(int keycode, t_data *data)
 		mlx_destroy_window(data->mlx, data->win);
 		exit(0);
 	}
-	printf("collectibles count: %d\n", data->map->collectibles_count);
-//	printf("keycode: %d\n", keycode);
 	return (0);
 }
 
