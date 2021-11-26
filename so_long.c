@@ -32,7 +32,7 @@ int		y_dim;
 typedef	struct	s_data	{
 void	*mlx;
 void	*win;
-t_img	*empty_space;
+t_img	*empty_sp;
 t_img	*wall;
 t_img	*collectible;
 t_img	*exit;
@@ -44,16 +44,14 @@ t_map	*map;
 
 t_map	*ft_check_map(const char *path_to_file);
 int		ft_print_map(t_data *data);
+void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
+void	ft_get_sprites(t_data *data);
+t_img	*ft_get_sprite(t_data *data, char *path_to_image);
 int		ft_exit_prog(int keycode, t_data *data);
-//int		ft_update_frame(t_data *data);
 
 int main(int argc, char *argv[])
 {
 	t_data	data;
-	int		x_dim;
-	int		y_dim;
-	t_img	*player;
-	t_img	*back;
 
 	if (argc != 2)
 	{
@@ -62,19 +60,8 @@ int main(int argc, char *argv[])
 	}
 	data.map = ft_check_map(argv[1]);
 	data.mlx = mlx_init();
-	player = (t_img *)malloc(sizeof(t_img));
-	back = (t_img *)malloc(sizeof(t_img));
-	player->addr = mlx_xpm_file_to_image(data.mlx, "./sprites/my_hero.XPM", &x_dim, &y_dim);
-//	data.empty_space->addr = mlx_xpm_file_to_image(data.mlx, "./sprites/background.xpm", &x_dim, &y_dim);
-//	data.empty_space->x_dim = x_dim;
-//	data.empty_space->y_dim = y_dim;
-//	data.player = mlx_xpm_file_to_image(data.mlx, "./sprites/my_hero.XPM", &x_dim, &y_dim);
-//	data.player->x_dim = x_dim;
-//	data.player->y_dim = y_dim;
-
-	data.player = player;
-	data.win = mlx_new_window(data.mlx, (data.map->cols) * x_dim, (data.map->rows) * y_dim, "omg_so_long_daddy");
-	printf("main: %p\n", data.player->addr);
+	ft_get_sprites(&data);
+	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.player->x_dim, (data.map->rows) * data.player->y_dim, "omg_so_long_daddy");
 	ft_print_map(&data);
 	mlx_hook(data.win, 2, 1L<<0, ft_exit_prog, &data);
 	mlx_loop(data.mlx);
@@ -125,31 +112,6 @@ int		ft_exit_prog(int keycode, t_data *data)
 	return (0);
 }
 
-//int		ft_update_frame(t_data *data)
-//{
-//	int	sprite_x_dim;
-//	int	sprite_y_dim;
-//	void *spr;
-//
-//	spr = mlx_xpm_file_to_image(data->mlx, "./sprites/my_hero.xpm", &sprite_x_dim, &sprite_y_dim);
-//	if (!spr)
-//		exit(25);
-//	mlx_put_image_to_window(data->mlx, data->win, spr, data->map.cols, data->map.rows);
-//	printf("%d\n%d\n", data->map.cols, data->map.rows);
-//
-//	while (data->map->cols >= 0)
-//	{
-//		mlx_put_image_to_window(data->mlx, data->win, spr, (data->map->cols) * sprite_x_dim, 0);
-//		(data->map->cols)--;
-//		printf("x_dim: %d\ny_dim: %d\nmap.cols: %d\nmap.rows: %d\n", sprite_x_dim, sprite_y_dim, data->map->cols, data->map->rows);
-//	}
-//
-//	printf("hello\n");
-//	if (map->cols == 0)
-//		return (1);
-//	return (0);
-//}
-
 int		ft_print_map(t_data *data)
 {
 	int i;
@@ -161,13 +123,62 @@ int		ft_print_map(t_data *data)
 		i = 0;
 		while (i < data->map->cols)
 		{
-//			printf("ft_print_map: %p ", data->player->addr);
-			mlx_put_image_to_window(data->mlx, data->win, data->player->addr, i * 63, j * 63);
-//			printf("%d:%d ", i, j);
+			ft_print_sprite(data, data->map->strings[j][i], i, j);
 			i++;
 		}
-		printf("\n");
 		j++;
 	}
 	return (0);
+}
+
+void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos)
+{
+	if (sprite_symb == '1')
+		mlx_put_image_to_window(data->mlx, data->win, data->wall->addr,
+								x_pos * (data->wall->x_dim),
+								y_pos * (data->wall->y_dim));
+	if (sprite_symb == '0')
+		mlx_put_image_to_window(data->mlx, data->win, data->empty_sp->addr,
+											x_pos * (data->empty_sp->x_dim),
+											y_pos * (data->empty_sp->y_dim));
+	if (sprite_symb == 'C' || sprite_symb == 'c')
+		mlx_put_image_to_window(data->mlx, data->win, data->collectible->addr,
+											x_pos * (data->collectible->x_dim),
+											y_pos * (data->collectible->y_dim));
+	if (sprite_symb == 'E' || sprite_symb == 'e')
+		mlx_put_image_to_window(data->mlx, data->win, data->exit->addr,
+											x_pos * (data->exit->x_dim),
+											y_pos * (data->exit->y_dim));
+	if (sprite_symb == 'P' || sprite_symb == 'p')
+		mlx_put_image_to_window(data->mlx, data->win, data->player->addr,
+											x_pos * (data->player->x_dim),
+											y_pos * (data->player->y_dim));
+	if (sprite_symb == 'G' || sprite_symb == 'g')
+		mlx_put_image_to_window(data->mlx, data->win, data->enemy->addr,
+											x_pos * (data->enemy->x_dim),
+											y_pos * (data->enemy->y_dim));
+}
+
+void	ft_get_sprites(t_data *data)
+{
+	data->empty_sp = ft_get_sprite(data, "./sprites/background.xpm");
+	data->wall = ft_get_sprite(data, "./sprites/wall.xpm");
+	data->collectible = ft_get_sprite(data, "./sprites/coin.xpm");
+	data->exit = ft_get_sprite(data, "./sprites/exit.xpm");
+	data->player = ft_get_sprite(data, "./sprites/hero.XPM");
+	data->enemy = ft_get_sprite(data, "./sprites/enemy.xpm");
+}
+
+t_img	*ft_get_sprite(t_data *data, char *path_to_image)
+{
+	t_img	*sprite;
+
+	sprite = (t_img *)malloc(sizeof(t_img));
+	if (!sprite)
+		exit(EXIT_FAILURE);
+	sprite->addr = mlx_xpm_file_to_image(data->mlx, path_to_image,
+										 &(sprite->x_dim), &(sprite->y_dim));
+	if (sprite->addr == NULL)
+		exit(EXIT_FAILURE);
+	return (sprite);
 }

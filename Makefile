@@ -41,6 +41,8 @@ debug	:
 			${CC} ${CFLAGS} -g ${SRCS} -L./libft -lmlx -lft -framework OpenGL \
                                     			-framework AppKit -o ${NAME}_debug
 
+re		:	fclean ${NAME}
+
 run		:	${NAME}
 			./${NAME} ./maps/map1.ber
 
