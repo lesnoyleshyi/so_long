@@ -21,6 +21,8 @@ typedef struct	s_map	{
 char	**strings;
 int		rows;
 int		cols;
+int		pl_pos_x;
+int		pl_pos_y;
 }				t_map;
 
 typedef struct	s_img	{
@@ -48,6 +50,7 @@ void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
 void	ft_get_sprites(t_data *data);
 t_img	*ft_get_sprite(t_data *data, char *path_to_image);
 int		ft_exit_prog(int keycode, t_data *data);
+void	ft_get_player_pos(t_map *map);
 
 int main(int argc, char *argv[])
 {
@@ -61,7 +64,8 @@ int main(int argc, char *argv[])
 	data.map = ft_check_map(argv[1]);
 	data.mlx = mlx_init();
 	ft_get_sprites(&data);
-	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.player->x_dim, (data.map->rows) * data.player->y_dim, "omg_so_long_daddy");
+	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.player->x_dim,
+							  (data.map->rows) * data.player->y_dim, "so_long");
 	ft_print_map(&data);
 	mlx_hook(data.win, 2, 1L<<0, ft_exit_prog, &data);
 	mlx_loop(data.mlx);
@@ -96,8 +100,10 @@ t_map	*ft_check_map(const char *path_to_file)
 	}
 	map.rows = i;
 	map.cols = ft_strlen(map.strings[0]);
+	ft_get_player_pos(&map);
 	printf("map.rows = %d\n", map.rows);
 	printf("map.cols = %d\n", map.cols);
+	printf("player pos: [%d][%d]\n", map.pl_pos_x, map.pl_pos_y);
 	close(fd);
 	return (&map);
 }
@@ -181,4 +187,27 @@ t_img	*ft_get_sprite(t_data *data, char *path_to_image)
 	if (sprite->addr == NULL)
 		exit(EXIT_FAILURE);
 	return (sprite);
+}
+
+void	ft_get_player_pos(t_map *map)
+{
+	int i;
+	int j;
+
+	i = 0;
+	while (i < map->rows)
+	{
+		j = 0;
+		while (j < map->cols)
+		{
+			if (map->strings[i][j] == 'P' || map->strings[i][j] == 'p')
+			{
+				map->pl_pos_x = i;
+				map->pl_pos_y = j;
+				return ;
+			}
+			j++;
+		}
+		i++;
+	}
 }
