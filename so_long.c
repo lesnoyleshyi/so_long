@@ -21,8 +21,10 @@ typedef struct	s_map	{
 char	**strings;
 int		rows;
 int		cols;
+int		collectibles_count;
 int		pl_pos_x;
 int		pl_pos_y;
+int		player_steps;
 }				t_map;
 
 typedef struct	s_img	{
@@ -38,6 +40,7 @@ t_img	*empty_sp;
 t_img	*wall;
 t_img	*collectible;
 t_img	*exit;
+t_img	*open_exit;
 t_img	*player;
 t_img	*enemy;
 t_map	*map;
@@ -51,10 +54,11 @@ void	ft_get_sprites(t_data *data);
 t_img	*ft_get_sprite(t_data *data, char *path_to_image);
 int		ft_exit_prog(int keycode, t_data *data);
 void	ft_get_player_pos(t_map *map);
-void	ft_move_up(t_map *map);
-void	ft_move_down(t_map *map);
-void	ft_move_left(t_map *map);
-void	ft_move_right(t_map *map);
+void	ft_count_collectibles(t_map *map);
+void	ft_move_up(t_map *map, t_data *data);
+void	ft_move_down(t_map *map, t_data *data);
+void	ft_move_left(t_map *map, t_data *data);
+void	ft_move_right(t_map *map, t_data *data);
 
 int main(int argc, char *argv[])
 {
@@ -106,9 +110,12 @@ t_map	*ft_check_map(const char *path_to_file)
 	map.rows = i;
 	map.cols = ft_strlen(map.strings[0]);
 	ft_get_player_pos(&map);
+	ft_count_collectibles(&map);
+	map.player_steps = 0;
 	printf("map.rows = %d\n", map.rows);
 	printf("map.cols = %d\n", map.cols);
-	printf("player pos: [%d][%d]\n", map.pl_pos_x, map.pl_pos_y);
+	printf("player start position: [%d][%d]\n", map.pl_pos_x, map.pl_pos_y);
+	printf("Collectibles count: %d\n", map.collectibles_count);
 	close(fd);
 	return (&map);
 }
@@ -116,19 +123,20 @@ t_map	*ft_check_map(const char *path_to_file)
 int		ft_exit_prog(int keycode, t_data *data)
 {
 	if (keycode == 13)
-		ft_move_up(data->map);
+		ft_move_up(data->map, data);
 	if (keycode == 1)
-		ft_move_down(data->map);
+		ft_move_down(data->map, data);
 	if (keycode == 0)
-		ft_move_left(data->map);
+		ft_move_left(data->map, data);
 	if (keycode == 2)
-		ft_move_right(data->map);
+		ft_move_right(data->map, data);
 	if (keycode == 53)
 	{
 		mlx_destroy_window(data->mlx, data->win);
 		exit(0);
 	}
-	printf("keycode: %d\n", keycode);
+	printf("collectibles count: %d\n", data->map->collectibles_count);
+//	printf("keycode: %d\n", keycode);
 	return (0);
 }
 
@@ -185,6 +193,7 @@ void	ft_get_sprites(t_data *data)
 	data->wall = ft_get_sprite(data, "./sprites/wall.xpm");
 	data->collectible = ft_get_sprite(data, "./sprites/coin.xpm");
 	data->exit = ft_get_sprite(data, "./sprites/exit.xpm");
+	data->open_exit = ft_get_sprite(data, "./sprites/open_exit.xpm");
 	data->player = ft_get_sprite(data, "./sprites/hero.XPM");
 	data->enemy = ft_get_sprite(data, "./sprites/enemy.xpm");
 }
@@ -226,7 +235,7 @@ void	ft_get_player_pos(t_map *map)
 	}
 }
 
-void	ft_move_up(t_map *map)
+void	ft_move_up(t_map *map, t_data *data)
 {
 //	printf("Previous pos: [%d][%d]\n", map->pl_pos_x, map->pl_pos_y);
 	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'G' ||
@@ -234,72 +243,167 @@ void	ft_move_up(t_map *map)
 	{
 		exit(0);
 	}
-	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == '1')
+	if ((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == '1') ||
+			((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E') &&
+			map->collectibles_count != 0))
 	{
 		return;
 	}
 	else
 	{
+		if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'C' ||
+				map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'c')
+		{
+			map->collectibles_count -= 1;
+		}
+		if (map->collectibles_count == 0)
+		{
+			data->exit = data->open_exit;
+			if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E' ||
+				 map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'e')
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(0);
+			}
+		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x - 1][map->pl_pos_y] = 'P';
 		map->pl_pos_x -= 1;
+		map->player_steps += 1;
+		printf("Steps count: %d\n", map->player_steps);
 	}
 //	printf("Next pos: [%d][%d]\n", map->pl_pos_x, map->pl_pos_y);
 }
 
-void	ft_move_down(t_map *map)
+void	ft_move_down(t_map *map, t_data *data)
 {
 	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'G' ||
 		map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'g')
 	{
 		exit(0);
 	}
-	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == '1')
+	if ((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == '1') ||
+		((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E') &&
+		 map->collectibles_count != 0))
 	{
 		return ;
 	}
 	else
 	{
+		if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'C' ||
+			map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'c')
+		{
+			map->collectibles_count -= 1;
+		}
+		if (map->collectibles_count == 0)
+		{
+			data->exit = data->open_exit;
+			if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E' ||
+				map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'e')
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(0);
+			}
+		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x + 1][map->pl_pos_y] = 'P';
 		map->pl_pos_x += 1;
+		map->player_steps += 1;
+		printf("Steps count: %d\n", map->player_steps);
 	}
 }
 
-void	ft_move_left(t_map *map)
+void	ft_move_left(t_map *map, t_data *data)
 {
 	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'G' ||
 		map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'g')
 	{
 		exit(0);
 	}
-	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == '1')
+	if ((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == '1') ||
+		((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E') &&
+		 map->collectibles_count != 0))
 	{
 		return ;
 	}
 	else
 	{
+		if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'C' ||
+			map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'c')
+		{
+			map->collectibles_count -= 1;
+		}
+		if (map->collectibles_count == 0)
+		{
+			data->exit = data->open_exit;
+			if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E' ||
+				map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'e')
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(0);
+			}
+		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x][map->pl_pos_y - 1] = 'P';
 		map->pl_pos_y -= 1;
+		map->player_steps += 1;
+		printf("Steps count: %d\n", map->player_steps);
 	}
 }
 
-void	ft_move_right(t_map *map)
+void	ft_move_right(t_map *map, t_data *data)
 {
 	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'G' ||
 		map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'g')
 	{
 		exit(0);
 	}
-	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == '1')
+	if ((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == '1') ||
+		((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E') &&
+		 map->collectibles_count != 0))
 	{
 		return ;
 	}
 	else
 	{
+		if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'C' ||
+			map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'c')
+		{
+			map->collectibles_count -= 1;
+		}
+		if (map->collectibles_count == 0)
+		{
+			data->exit = data->open_exit;
+			if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E' ||
+				map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'e')
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(0);
+			}
+		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x][map->pl_pos_y + 1] = 'P';
 		map->pl_pos_y += 1;
+		map->player_steps += 1;
+		printf("Steps count: %d\n", map->player_steps);
+	}
+}
+
+void	ft_count_collectibles(t_map *map)
+{
+	int	i;
+	int j;
+
+	i = 0;
+	while (i < map->rows)
+	{
+		j = 0;
+		while (j < map->cols)
+		{
+			if (map->strings[i][j] == 'C' || map->strings[i][j] == 'c')
+				map->collectibles_count++;
+			j++;
+		}
+		i++;
 	}
 }
