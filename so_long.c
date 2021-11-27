@@ -49,16 +49,17 @@ t_map	*map;
 
 t_map	*ft_check_map(const char *path_to_file);
 int		ft_print_map(t_data *data);
+t_img	*ft_get_sprite(t_data *data, char *path_to_image);
 void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
 void	ft_get_sprites(t_data *data);
-t_img	*ft_get_sprite(t_data *data, char *path_to_image);
-int		ft_exit_prog(int keycode, t_data *data);
 void	ft_get_player_pos(t_map *map);
 void	ft_count_collectibles(t_map *map);
 void	ft_move_up(t_map *map, t_data *data);
 void	ft_move_down(t_map *map, t_data *data);
 void	ft_move_left(t_map *map, t_data *data);
 void	ft_move_right(t_map *map, t_data *data);
+int		ft_react_to_key(int keycode, t_data *data);
+int		ft_react_to_close_win(t_data *data);
 
 int main(int argc, char *argv[])
 {
@@ -74,9 +75,9 @@ int main(int argc, char *argv[])
 	ft_get_sprites(&data);
 	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.player->x_dim,
 							  (data.map->rows) * data.player->y_dim, "so_long");
-//	ft_print_map(&data);
 	mlx_loop_hook(data.mlx, ft_print_map, &data);
-	mlx_hook(data.win, 2, 1L<<0, ft_exit_prog, &data);
+	mlx_hook(data.win, 17, 0L, ft_react_to_close_win, &data);
+	mlx_hook(data.win, 2, 1L<<0, ft_react_to_key, &data);
 	mlx_loop(data.mlx);
 	return (0);
 }
@@ -120,7 +121,7 @@ t_map	*ft_check_map(const char *path_to_file)
 	return (&map);
 }
 
-int		ft_exit_prog(int keycode, t_data *data)
+int		ft_react_to_key(int keycode, t_data *data)
 {
 	if (keycode == 13)
 		ft_move_up(data->map, data);
@@ -235,34 +236,21 @@ void	ft_get_player_pos(t_map *map)
 
 void	ft_move_up(t_map *map, t_data *data)
 {
-//	printf("Previous pos: [%d][%d]\n", map->pl_pos_x, map->pl_pos_y);
-	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'G' ||
-		map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'g')
-	{
-		exit(0);
-	}
+	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == '1') ||
 			((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E') &&
 			map->collectibles_count != 0))
-	{
 		return;
-	}
 	else
 	{
-		if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'C' ||
-				map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'c')
-		{
+		if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'C')
 			map->collectibles_count -= 1;
-		}
 		if (map->collectibles_count == 0)
 		{
-			data->exit = data->open_exit;
-			if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E' ||
-				 map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'e')
-			{
-				mlx_destroy_window(data->mlx, data->win);
-				exit(0);
-			}
+			data->exit->addr = data->open_exit->addr;
+			if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E')
+				exit(EXIT_SUCCESS);
 		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x - 1][map->pl_pos_y] = 'P';
@@ -270,38 +258,25 @@ void	ft_move_up(t_map *map, t_data *data)
 		map->player_steps += 1;
 		printf("Steps count: %d\n", map->player_steps);
 	}
-//	printf("Next pos: [%d][%d]\n", map->pl_pos_x, map->pl_pos_y);
 }
 
 void	ft_move_down(t_map *map, t_data *data)
 {
-	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'G' ||
-		map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'g')
-	{
-		exit(0);
-	}
+	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == '1') ||
 		((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E') &&
 		 map->collectibles_count != 0))
-	{
 		return ;
-	}
 	else
 	{
-		if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'C' ||
-			map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'c')
-		{
+		if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'C')
 			map->collectibles_count -= 1;
-		}
 		if (map->collectibles_count == 0)
 		{
-			data->exit = data->open_exit;
-			if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E' ||
-				map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'e')
-			{
-				mlx_destroy_window(data->mlx, data->win);
-				exit(0);
-			}
+			data->exit->addr = data->open_exit->addr;
+			if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E')
+				exit(EXIT_SUCCESS);
 		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x + 1][map->pl_pos_y] = 'P';
@@ -313,33 +288,21 @@ void	ft_move_down(t_map *map, t_data *data)
 
 void	ft_move_left(t_map *map, t_data *data)
 {
-	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'G' ||
-		map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'g')
-	{
-		exit(0);
-	}
+	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == '1') ||
 		((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E') &&
 		 map->collectibles_count != 0))
-	{
 		return ;
-	}
 	else
 	{
-		if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'C' ||
-			map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'c')
-		{
+		if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'C')
 			map->collectibles_count -= 1;
-		}
 		if (map->collectibles_count == 0)
 		{
-			data->exit = data->open_exit;
-			if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E' ||
-				map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'e')
-			{
-				mlx_destroy_window(data->mlx, data->win);
-				exit(0);
-			}
+			data->exit->addr = data->open_exit->addr;
+			if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E')
+				exit(EXIT_SUCCESS);
 		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x][map->pl_pos_y - 1] = 'P';
@@ -351,33 +314,21 @@ void	ft_move_left(t_map *map, t_data *data)
 
 void	ft_move_right(t_map *map, t_data *data)
 {
-	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'G' ||
-		map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'g')
-	{
-		exit(0);
-	}
+	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == '1') ||
 		((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E') &&
 		 map->collectibles_count != 0))
-	{
 		return ;
-	}
 	else
 	{
-		if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'C' ||
-			map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'c')
-		{
+		if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'C')
 			map->collectibles_count -= 1;
-		}
 		if (map->collectibles_count == 0)
 		{
-			data->exit = data->open_exit;
-			if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E' ||
-				map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'e')
-			{
-				mlx_destroy_window(data->mlx, data->win);
-				exit(0);
-			}
+			data->exit->addr = data->open_exit->addr;
+			if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E')
+				exit(EXIT_SUCCESS);
 		}
 		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
 		map->strings[map->pl_pos_x][map->pl_pos_y + 1] = 'P';
@@ -404,4 +355,10 @@ void	ft_count_collectibles(t_map *map)
 		}
 		i++;
 	}
+}
+
+int		ft_react_to_close_win(t_data *data)
+{
+	mlx_destroy_window(data->mlx, data->win);
+	exit(0);
 }
