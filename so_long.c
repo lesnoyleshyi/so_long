@@ -51,6 +51,7 @@ t_map	*ft_check_map(const char *path_to_file);
 int		ft_print_map(t_data *data);
 t_img	*ft_get_sprite(t_data *data, char *path_to_image);
 void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
+void	ft_put_step_count_to_win(t_data *data);
 void	ft_get_sprites(t_data *data);
 void	ft_get_player_pos(t_map *map);
 void	ft_count_collectibles(t_map *map);
@@ -141,8 +142,8 @@ int		ft_react_to_key(int keycode, t_data *data)
 
 int		ft_print_map(t_data *data)
 {
-	int i;
-	int j;
+	int 	i;
+	int 	j;
 
 	j = 0;
 	while (j < data->map->rows)
@@ -155,6 +156,7 @@ int		ft_print_map(t_data *data)
 		}
 		j++;
 	}
+	ft_put_step_count_to_win(data);
 	return (0);
 }
 
@@ -361,4 +363,20 @@ int		ft_react_to_close_win(t_data *data)
 {
 	mlx_destroy_window(data->mlx, data->win);
 	exit(0);
+}
+
+void	ft_put_step_count_to_win(t_data *data)
+{
+	char	*steps;
+	int		color;
+
+	color = 0x00FFFFFF;
+	steps = ft_itoa(data->map->player_steps);
+	mlx_string_put(data->mlx, data->win,
+				   (data->map->cols) / 2 * data->wall->x_dim,
+				   data->wall->y_dim / 2, color, "STEPS:");
+	mlx_string_put(data->mlx, data->win,
+				   (data->map->cols) /2 * data->wall->x_dim + 60,
+				   data->wall->y_dim / 2, color, steps);
+	free(steps);
 }
