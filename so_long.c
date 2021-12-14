@@ -10,63 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "mlx/mlx_mms/mlx.h"
-#include <stdio.h>
-#include "libft/libft.h"
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-
-typedef struct	s_map	{
-char	**strings;
-int		rows;
-int		cols;
-int		collectibles_count;
-int		pl_pos_x;
-int		pl_pos_y;
-int		player_steps;
-}				t_map;
-
-typedef struct	s_img	{
-void	*addr;
-int		x_dim;
-int		y_dim;
-}				t_img;
-
-typedef	struct	s_data	{
-void	*mlx;
-void	*win;
-t_img	*empty_sp;
-t_img	*wall;
-t_img	*collectible;
-t_img	*exit;
-t_img	*open_exit;
-t_img	*hero_up[2];
-t_img	*hero_down[2];
-t_img	*hero_right[2];
-t_img	*hero_left[2];
-t_img	**hero_orientation;
-t_img	*hero;
-t_img	*enemy;
-t_map	*map;
-}				t_data;
-
-
-t_map	*ft_check_map(const char *path_to_file);
-int		ft_print_map(t_data *data);
-t_img	*ft_get_sprite(t_data *data, char *path_to_image);
-void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
-void	ft_put_step_count_to_win(t_data *data);
-void	ft_get_sprites(t_data *data);
-void	ft_get_player_pos(t_map *map);
-void	ft_count_collectibles(t_map *map);
-void	ft_move_up(t_map *map, t_data *data);
-void	ft_move_down(t_map *map, t_data *data);
-void	ft_move_left(t_map *map, t_data *data);
-void	ft_move_right(t_map *map, t_data *data);
-int		ft_react_to_key(int keycode, t_data *data);
-int		ft_react_to_close_win(t_data *data);
-void	ft_change_sprite_state(t_data *data);
+#include "so_long.h"
+#include <printf.h>
 
 int main(int argc, char *argv[])
 {
@@ -138,6 +83,8 @@ int		ft_react_to_key(int keycode, t_data *data)
 		ft_move_left(data->map, data);
 	if (keycode == 2)
 		ft_move_right(data->map, data);
+	if (keycode == 0 || keycode == 1 || keycode == 2 || keycode == 13)
+		ft_print_steps_count(data->map->player_steps);
 	if (keycode == 53)
 	{
 		mlx_destroy_window(data->mlx, data->win);
@@ -252,114 +199,6 @@ void	ft_get_player_pos(t_map *map)
 	}
 }
 
-void	ft_move_up(t_map *map, t_data *data)
-{
-	data->hero_orientation = data->hero_up;
-	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'G')
-		exit(EXIT_SUCCESS);
-	if ((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == '1') ||
-			((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E') &&
-			map->collectibles_count != 0))
-		return;
-	else
-	{
-		if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'C')
-			map->collectibles_count -= 1;
-		if (map->collectibles_count == 0)
-		{
-			data->exit->addr = data->open_exit->addr;
-			if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E')
-				exit(EXIT_SUCCESS);
-		}
-		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
-		map->strings[map->pl_pos_x - 1][map->pl_pos_y] = 'P';
-		map->pl_pos_x -= 1;
-		map->player_steps += 1;
-		printf("Steps count: %d\n", map->player_steps);
-	}
-}
-
-void	ft_move_down(t_map *map, t_data *data)
-{
-	data->hero_orientation = data->hero_down;
-	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'G')
-		exit(EXIT_SUCCESS);
-	if ((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == '1') ||
-		((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E') &&
-		 map->collectibles_count != 0))
-		return ;
-	else
-	{
-		if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'C')
-			map->collectibles_count -= 1;
-		if (map->collectibles_count == 0)
-		{
-			data->exit->addr = data->open_exit->addr;
-			if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E')
-				exit(EXIT_SUCCESS);
-		}
-		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
-		map->strings[map->pl_pos_x + 1][map->pl_pos_y] = 'P';
-		map->pl_pos_x += 1;
-		map->player_steps += 1;
-		printf("Steps count: %d\n", map->player_steps);
-	}
-}
-
-void	ft_move_left(t_map *map, t_data *data)
-{
-	data->hero_orientation = data->hero_left;
-	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'G')
-		exit(EXIT_SUCCESS);
-	if ((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == '1') ||
-		((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E') &&
-		 map->collectibles_count != 0))
-		return ;
-	else
-	{
-		if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'C')
-			map->collectibles_count -= 1;
-		if (map->collectibles_count == 0)
-		{
-			data->exit->addr = data->open_exit->addr;
-			if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E')
-				exit(EXIT_SUCCESS);
-		}
-		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
-		map->strings[map->pl_pos_x][map->pl_pos_y - 1] = 'P';
-		map->pl_pos_y -= 1;
-		map->player_steps += 1;
-		printf("Steps count: %d\n", map->player_steps);
-	}
-}
-
-void	ft_move_right(t_map *map, t_data *data)
-{
-	data->hero_orientation = data->hero_right;
-	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'G')
-		exit(EXIT_SUCCESS);
-	if ((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == '1') ||
-		((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E') &&
-		 map->collectibles_count != 0))
-		return ;
-	else
-	{
-		if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'C')
-			map->collectibles_count -= 1;
-		if (map->collectibles_count == 0)
-		{
-			data->exit->addr = data->open_exit->addr;
-			if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E')
-				exit(EXIT_SUCCESS);
-		}
-		map->strings[map->pl_pos_x][map->pl_pos_y] = '0';
-		map->strings[map->pl_pos_x][map->pl_pos_y + 1] = 'P';
-		map->pl_pos_y += 1;
-		map->player_steps += 1;
-		printf("Steps count: %d\n", map->player_steps);
-	}
-}
-
 void	ft_count_collectibles(t_map *map)
 {
 	int	i;
@@ -412,4 +251,15 @@ void	ft_change_sprite_state(t_data *data)
 		data->hero = data->hero_orientation[0];
 	else
 		data->hero = data->hero_orientation[1];
+}
+
+void	ft_print_steps_count(int steps_count)
+{
+	char	*count;
+
+	count = ft_itoa(steps_count);
+	ft_putstr_fd("Players steps count: ", 1);
+	ft_putstr_fd(count, 1);
+	ft_putstr_fd("\n", 1);
+	free(count);
 }

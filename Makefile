@@ -13,7 +13,7 @@
 
 NAME	=	so_long
 
-SRCS	=	so_long.c
+SRCS	=	so_long.c ft_move_funcs.c
 
 OBJS	=	${SRCS:.c=.o}
 
