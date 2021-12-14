@@ -35,6 +35,7 @@ void	ft_move_up(t_map *map, t_data *data)
 		map->strings[map->pl_pos_x - 1][map->pl_pos_y] = 'P';
 		map->pl_pos_x -= 1;
 		map->player_steps += 1;
+		ft_print_steps_count(map->player_steps);
 	}
 }
 
@@ -61,6 +62,7 @@ void	ft_move_down(t_map *map, t_data *data)
 		map->strings[map->pl_pos_x + 1][map->pl_pos_y] = 'P';
 		map->pl_pos_x += 1;
 		map->player_steps += 1;
+		ft_print_steps_count(map->player_steps);
 	}
 }
 
@@ -87,6 +89,7 @@ void	ft_move_left(t_map *map, t_data *data)
 		map->strings[map->pl_pos_x][map->pl_pos_y - 1] = 'P';
 		map->pl_pos_y -= 1;
 		map->player_steps += 1;
+		ft_print_steps_count(map->player_steps);
 	}
 }
 
@@ -113,5 +116,6 @@ void	ft_move_right(t_map *map, t_data *data)
 		map->strings[map->pl_pos_x][map->pl_pos_y + 1] = 'P';
 		map->pl_pos_y += 1;
 		map->player_steps += 1;
+		ft_print_steps_count(map->player_steps);
 	}
 }

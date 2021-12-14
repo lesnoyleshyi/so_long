@@ -22,8 +22,6 @@ int	ft_react_to_key(int keycode, t_data *data)
 		ft_move_left(data->map, data);
 	if (keycode == 2)
 		ft_move_right(data->map, data);
-	if (keycode == 0 || keycode == 1 || keycode == 2 || keycode == 13)
-		ft_print_steps_count(data->map->player_steps);
 	if (keycode == 53)
 	{
 		mlx_destroy_window(data->mlx, data->win);
