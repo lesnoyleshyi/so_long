@@ -41,7 +41,12 @@ t_img	*wall;
 t_img	*collectible;
 t_img	*exit;
 t_img	*open_exit;
-t_img	*player;
+t_img	*hero_up[2];
+t_img	*hero_down[2];
+t_img	*hero_right[2];
+t_img	*hero_left[2];
+t_img	**hero_orientation;
+t_img	*hero;
 t_img	*enemy;
 t_map	*map;
 }				t_data;
@@ -61,6 +66,7 @@ void	ft_move_left(t_map *map, t_data *data);
 void	ft_move_right(t_map *map, t_data *data);
 int		ft_react_to_key(int keycode, t_data *data);
 int		ft_react_to_close_win(t_data *data);
+void	ft_change_sprite_state(t_data *data);
 
 int main(int argc, char *argv[])
 {
@@ -74,8 +80,10 @@ int main(int argc, char *argv[])
 	data.map = ft_check_map(argv[1]);
 	data.mlx = mlx_init();
 	ft_get_sprites(&data);
-	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.player->x_dim,
-							  (data.map->rows) * data.player->y_dim, "so_long");
+	printf("Sprites ok\n");
+	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.wall->x_dim,
+							  (data.map->rows) * data.wall->y_dim, "so_long");
+	printf("window created\n");
 	mlx_loop_hook(data.mlx, ft_print_map, &data);
 	mlx_hook(data.win, 17, 0L, ft_react_to_close_win, &data);
 	mlx_hook(data.win, 2, 1L<<0, ft_react_to_key, &data);
@@ -142,9 +150,10 @@ int		ft_react_to_key(int keycode, t_data *data)
 
 int		ft_print_map(t_data *data)
 {
-	int 	i;
-	int 	j;
+	int 		i;
+	int 		j;
 
+	ft_change_sprite_state(data);
 	j = 0;
 	while (j < data->map->rows)
 	{
@@ -152,6 +161,7 @@ int		ft_print_map(t_data *data)
 		while (i < data->map->cols)
 		{
 			ft_print_sprite(data, data->map->strings[j][i], i, j);
+//			printf("ok for %c in [%d][%d]\n", data->map->strings[j][i], j, i);
 			i++;
 		}
 		j++;
@@ -170,19 +180,19 @@ void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos)
 		mlx_put_image_to_window(data->mlx, data->win, data->empty_sp->addr,
 											x_pos * (data->empty_sp->x_dim),
 											y_pos * (data->empty_sp->y_dim));
-	if (sprite_symb == 'C' || sprite_symb == 'c')
+	if (sprite_symb == 'C')
 		mlx_put_image_to_window(data->mlx, data->win, data->collectible->addr,
 											x_pos * (data->collectible->x_dim),
 											y_pos * (data->collectible->y_dim));
-	if (sprite_symb == 'E' || sprite_symb == 'e')
+	if (sprite_symb == 'E')
 		mlx_put_image_to_window(data->mlx, data->win, data->exit->addr,
 											x_pos * (data->exit->x_dim),
 											y_pos * (data->exit->y_dim));
-	if (sprite_symb == 'P' || sprite_symb == 'p')
-		mlx_put_image_to_window(data->mlx, data->win, data->player->addr,
-											x_pos * (data->player->x_dim),
-											y_pos * (data->player->y_dim));
-	if (sprite_symb == 'G' || sprite_symb == 'g')
+	if (sprite_symb == 'P')
+		mlx_put_image_to_window(data->mlx, data->win, data->hero->addr,
+											x_pos * (data->hero->x_dim),
+											y_pos * (data->hero->y_dim));
+	if (sprite_symb == 'G')
 		mlx_put_image_to_window(data->mlx, data->win, data->enemy->addr,
 											x_pos * (data->enemy->x_dim),
 											y_pos * (data->enemy->y_dim));
@@ -191,12 +201,26 @@ void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos)
 void	ft_get_sprites(t_data *data)
 {
 	data->empty_sp = ft_get_sprite(data, "./sprites/background.xpm");
+	printf("back ok\n");
 	data->wall = ft_get_sprite(data, "./sprites/wall.xpm");
+	printf("wall ok\n");
 	data->collectible = ft_get_sprite(data, "./sprites/coin.xpm");
+	printf("coin ok\n");
 	data->exit = ft_get_sprite(data, "./sprites/exit.xpm");
+	printf("exit ok\n");
 	data->open_exit = ft_get_sprite(data, "./sprites/open_exit.xpm");
-	data->player = ft_get_sprite(data, "./sprites/hero.XPM");
+	printf("open exit ok\n");
 	data->enemy = ft_get_sprite(data, "./sprites/enemy.xpm");
+	data->hero_up[0] = ft_get_sprite(data, "./sprites/player_up_0.xpm");
+	data->hero_up[1] = ft_get_sprite(data, "./sprites/player_up_1.xpm");
+	data->hero_down[0] = ft_get_sprite(data, "./sprites/player_down_0.xpm");
+	data->hero_down[1] = ft_get_sprite(data, "./sprites/player_down_1.xpm");
+	data->hero_right[0] = ft_get_sprite(data, "./sprites/player_right_0.xpm");
+	data->hero_right[1] = ft_get_sprite(data, "./sprites/player_right_1.xpm");
+	data->hero_left[0] = ft_get_sprite(data, "./sprites/player_left_0.xpm");
+	data->hero_left[1] = ft_get_sprite(data, "./sprites/player_left_1.xpm");
+	data->hero_orientation = data->hero_up;
+	data->hero = data->hero_orientation[0];
 }
 
 t_img	*ft_get_sprite(t_data *data, char *path_to_image)
@@ -205,11 +229,17 @@ t_img	*ft_get_sprite(t_data *data, char *path_to_image)
 
 	sprite = (t_img *)malloc(sizeof(t_img));
 	if (!sprite)
+	{
+		ft_putstr_fd("hui\n", 1);
 		exit(EXIT_FAILURE);
+	}
 	sprite->addr = mlx_xpm_file_to_image(data->mlx, path_to_image,
 										 &(sprite->x_dim), &(sprite->y_dim));
 	if (sprite->addr == NULL)
+	{
+		ft_putstr_fd("hui2\n", 1);
 		exit(EXIT_FAILURE);
+	}
 	return (sprite);
 }
 
@@ -238,6 +268,7 @@ void	ft_get_player_pos(t_map *map)
 
 void	ft_move_up(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_up;
 	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'G')
 		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == '1') ||
@@ -264,6 +295,7 @@ void	ft_move_up(t_map *map, t_data *data)
 
 void	ft_move_down(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_down;
 	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'G')
 		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == '1') ||
@@ -290,6 +322,7 @@ void	ft_move_down(t_map *map, t_data *data)
 
 void	ft_move_left(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_left;
 	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'G')
 		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == '1') ||
@@ -316,6 +349,7 @@ void	ft_move_left(t_map *map, t_data *data)
 
 void	ft_move_right(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_right;
 	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'G')
 		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == '1') ||
@@ -379,4 +413,22 @@ void	ft_put_step_count_to_win(t_data *data)
 				   (data->map->cols) /2 * data->wall->x_dim + 60,
 				   data->wall->y_dim / 2, color, steps);
 	free(steps);
+}
+
+void	ft_change_sprite_state(t_data *data)
+{
+	static int	state;
+
+	state += 1;
+	if (state == 20)
+		state = 0;
+	printf("state: %d\n", state);
+	if (state < 10)
+	{
+		data->hero = data->hero_orientation[0];
+	}
+	else
+	{
+		data->hero = data->hero_orientation[1];
+	}
 }
