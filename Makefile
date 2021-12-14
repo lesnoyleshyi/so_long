@@ -13,7 +13,8 @@
 
 NAME	=	so_long
 
-SRCS	=	so_long.c ft_move_funcs.c
+SRCS	=	so_long.c	ft_map_funcs.c	ft_move_funcs.c	ft_sprite_funcs.c \
+			ft_print_on_screen_funcs.c	ft_react_to_keys_funcs.c
 
 OBJS	=	${SRCS:.c=.o}
 
