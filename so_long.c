@@ -80,10 +80,8 @@ int main(int argc, char *argv[])
 	data.map = ft_check_map(argv[1]);
 	data.mlx = mlx_init();
 	ft_get_sprites(&data);
-	printf("Sprites ok\n");
 	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.wall->x_dim,
 							  (data.map->rows) * data.wall->y_dim, "so_long");
-	printf("window created\n");
 	mlx_loop_hook(data.mlx, ft_print_map, &data);
 	mlx_hook(data.win, 17, 0L, ft_react_to_close_win, &data);
 	mlx_hook(data.win, 2, 1L<<0, ft_react_to_key, &data);
@@ -161,7 +159,6 @@ int		ft_print_map(t_data *data)
 		while (i < data->map->cols)
 		{
 			ft_print_sprite(data, data->map->strings[j][i], i, j);
-//			printf("ok for %c in [%d][%d]\n", data->map->strings[j][i], j, i);
 			i++;
 		}
 		j++;
@@ -201,15 +198,10 @@ void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos)
 void	ft_get_sprites(t_data *data)
 {
 	data->empty_sp = ft_get_sprite(data, "./sprites/background.xpm");
-	printf("back ok\n");
 	data->wall = ft_get_sprite(data, "./sprites/wall.xpm");
-	printf("wall ok\n");
 	data->collectible = ft_get_sprite(data, "./sprites/coin.xpm");
-	printf("coin ok\n");
-	data->exit = ft_get_sprite(data, "./sprites/exit.xpm");
-	printf("exit ok\n");
+	data->exit = ft_get_sprite(data, "./sprites/closed_exit.xpm");
 	data->open_exit = ft_get_sprite(data, "./sprites/open_exit.xpm");
-	printf("open exit ok\n");
 	data->enemy = ft_get_sprite(data, "./sprites/enemy.xpm");
 	data->hero_up[0] = ft_get_sprite(data, "./sprites/player_up_0.xpm");
 	data->hero_up[1] = ft_get_sprite(data, "./sprites/player_up_1.xpm");
@@ -229,17 +221,11 @@ t_img	*ft_get_sprite(t_data *data, char *path_to_image)
 
 	sprite = (t_img *)malloc(sizeof(t_img));
 	if (!sprite)
-	{
-		ft_putstr_fd("hui\n", 1);
 		exit(EXIT_FAILURE);
-	}
 	sprite->addr = mlx_xpm_file_to_image(data->mlx, path_to_image,
 										 &(sprite->x_dim), &(sprite->y_dim));
 	if (sprite->addr == NULL)
-	{
-		ft_putstr_fd("hui2\n", 1);
 		exit(EXIT_FAILURE);
-	}
 	return (sprite);
 }
 
@@ -422,13 +408,8 @@ void	ft_change_sprite_state(t_data *data)
 	state += 1;
 	if (state == 20)
 		state = 0;
-	printf("state: %d\n", state);
 	if (state < 10)
-	{
 		data->hero = data->hero_orientation[0];
-	}
 	else
-	{
 		data->hero = data->hero_orientation[1];
-	}
 }
