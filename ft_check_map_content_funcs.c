@@ -46,6 +46,41 @@ void	ft_verify_symbols_count(int exits, int collectibles, int players)
 		ft_perror_and_exit("Error\nWrong P/E/C number\n");
 }
 
+void	ft_check_rectangularity(t_map *map)
+{
+	int	i;
+
+	i = 0;
+	map->cols = ft_strlen(map->strings[0]);
+	while (map->strings[i])
+	{
+		if (map->cols != (int)ft_strlen(map->strings[i]))
+			ft_perror_and_exit("Error\nMap is not rectangular\n");
+		i++;
+	}
+	map->rows = i;
+}
+
+void	ft_check_is_enclosed(t_map map)
+{
+	int	cols;
+	int	rows;
+
+	cols = map.cols;
+	rows = map.rows;
+	while (cols--)
+	{
+		if (map.strings[0][cols] != '1' || map.strings[rows - 1][cols] != '1')
+			ft_perror_and_exit("Error\nMap is not enclosed\n");
+	}
+	cols = map.cols;
+	while (rows--)
+	{
+		if (map.strings[rows][0] != '1' || map.strings[rows][cols -1] != '1')
+			ft_perror_and_exit("Error\nMap is not enclosed\n");
+	}
+}
+
 void	ft_get_player_pos(t_map *map)
 {
 	int	i;

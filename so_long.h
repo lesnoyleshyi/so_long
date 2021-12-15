@@ -68,6 +68,8 @@ void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
 void	ft_put_step_count_to_win(t_data *data);
 void	ft_get_sprites(t_data *data);
 void	ft_get_player_pos(t_map *map);
+void	ft_check_is_enclosed(t_map map);
+void	ft_check_rectangularity(t_map *map);
 void	ft_change_sprite_state(t_data *data);
 void	ft_print_steps_count(int steps_count);
 void	ft_move_up(t_map *map, t_data *data);

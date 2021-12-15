@@ -16,26 +16,25 @@
 t_map	*ft_get_map(const char *path_to_file)
 {
 	static t_map	map;
-	int				i;
+//	int				i;
 
 	ft_check_map_extension(path_to_file);
 	map.strings = ft_read_map(path_to_file);
-	i = 0;
-	printf("Map:\n");
-	while (map.strings[i] != NULL)
-	{
-		printf("%d\t%s\n", i + 1, map.strings[i]);
-		i++;
-	}
-	map.rows = i;
-	map.cols = ft_strlen(map.strings[0]);
-	ft_get_player_pos(&map);
+	ft_check_rectangularity(&map);
 	ft_check_map_symbols(&map);
-	map.player_steps = 0;
-	printf("map.rows = %d\n", map.rows);
-	printf("map.cols = %d\n", map.cols);
-	printf("player start position: [%d][%d]\n", map.pl_pos_x, map.pl_pos_y);
-	printf("Collectibles count: %d\n", map.collectibles_count);
+	ft_check_is_enclosed(map);
+	ft_get_player_pos(&map);
+//	i = 0;
+//	printf("Map:\n");
+//	while (map.strings[i] != NULL)
+//	{
+//		printf("%d\t%s\n", i + 1, map.strings[i]);
+//		i++;
+//	}
+//	printf("map.rows = %d\n", map.rows);
+//	printf("map.cols = %d\n", map.cols);
+//	printf("player start position: [%d][%d]\n", map.pl_pos_x, map.pl_pos_y);
+//	printf("Collectibles count: %d\n", map.collectibles_count);
 	return (&map);
 }
 
