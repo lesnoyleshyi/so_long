@@ -50,6 +50,8 @@ char	**ft_read_map(const char *path_to_file)
 	if (fd == -1)
 		ft_close_fd_and_exit(fd, "Error!\nCan't open map\n");
 	ret = read(fd, buf, BUFFERSIZE);
+	if (ret == 0)
+		ft_close_fd_and_exit(fd, "Error!\nEmpty file!\n");
 	if (ret == -1)
 		ft_close_fd_and_exit(fd, "Error!\nCan't read map\n");
 	if (ret < BUFFERSIZE)
