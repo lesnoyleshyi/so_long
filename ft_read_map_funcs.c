@@ -30,7 +30,7 @@ t_map	*ft_get_map(const char *path_to_file)
 	map.rows = i;
 	map.cols = ft_strlen(map.strings[0]);
 	ft_get_player_pos(&map);
-	ft_count_collectibles(&map);
+	ft_check_map_symbols(&map);
 	map.player_steps = 0;
 	printf("map.rows = %d\n", map.rows);
 	printf("map.cols = %d\n", map.cols);
