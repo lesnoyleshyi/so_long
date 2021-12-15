@@ -21,7 +21,7 @@ int	main(int argc, char *argv[])
 		write(1, "You should provide one map as the first argument\n", 50);
 		return (0);
 	}
-	data.map = ft_check_map(argv[1]);
+	data.map = ft_get_map(argv[1]);
 	data.mlx = mlx_init();
 	ft_get_sprites(&data);
 	data.win = mlx_new_window(data.mlx, (data.map->cols) * data.wall->x_dim,

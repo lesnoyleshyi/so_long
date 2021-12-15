@@ -52,7 +52,7 @@ typedef struct s_data {
 	t_map	*map;
 }				t_data;
 
-t_map	*ft_check_map(const char *path_to_file);
+t_map	*ft_get_map(const char *path_to_file);
 int		ft_print_map(t_data *data);
 t_img	*ft_get_sprite(t_data *data, char *path_to_image);
 void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
