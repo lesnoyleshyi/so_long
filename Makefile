@@ -13,40 +13,61 @@
 
 NAME	=	so_long
 
+HEADER	=	so_long.h
+
+MLX_LIB	=	libmlx.dylib
+
 SRCS	=	so_long.c	ft_read_map_funcs.c	ft_check_file_extension_funcs.c \
 			ft_move_funcs.c	ft_sprite_funcs.c ft_check_map_content_funcs.c \
 			ft_print_on_screen_funcs.c	ft_react_to_keys_funcs.c
 
+B_SRCS	=	${SRCS:.c=_bonus.c}
+
 OBJS	=	${SRCS:.c=.o}
+
+B_OBJS	=	${B_SRCS:.c=.o}
 
 CC		=	gcc
 
 CFLAGS	=	-Wall -Werror -Wextra
 
-%.o		:	%.c
-			${CC} ${CFLAGS} $< -I./mlx/mlx_mms -c -o $@
+%.o			:	%.c	${HEADER}
+				${CC} ${CFLAGS} $< -I./mlx/mlx_mms -c -o $@
 
-.PHONY	:	all re clean fclean
+.PHONY		:	all re clean fclean debug debug_bonus ch_leak run
 
-${NAME}	:	${OBJS}
-			cp ./mlx/mlx_mms/libmlx.dylib ./
-			${CC} ${CFLAGS} -L./libft -lmlx -lft -framework OpenGL \
-			-framework AppKit ${OBJS} -o ${NAME}
+${NAME}		:	${OBJS} ${MLX_LIB}
+				${CC} ${CFLAGS} -L./libft -lmlx -lft -framework OpenGL \
+				-framework AppKit ${OBJS} -o ${NAME}
 
-clean	:
-			rm -rf ${OBJS}
+bonus		:	${B_OBJS} ${MLX_LIB}
+				${CC} ${CFLAGS} -L./libft -lmlx -lft -framework OpenGL \
+				-framework AppKit ${B_OBJS} -o bonus
 
-fclean	:	clean
-			rm -rf ${NAME}
+${MLX_LIB}	:
+				${MAKE} -C ./mlx/mlx_mms/
+				cp ./mlx/mlx_mms/libmlx.dylib ./
 
-debug	:
-			${CC} ${CFLAGS} -g ${SRCS} -L./libft -lmlx -lft -framework OpenGL \
-                                    			-framework AppKit -o ${NAME}_debug
+clean		:
+				rm -rf ${OBJS} ${B_OBJS}
 
-re		:	fclean ${NAME}
+fclean		:	clean
+				rm -rf ${NAME} ${B_NAME}
 
-run		:	${NAME}
-			./${NAME} ./maps/map1.ber
+debug		:
+				${CC} ${CFLAGS} -g ${SRCS} -L./libft -lmlx -lft \
+ 				-framework OpenGL -framework AppKit -o ${NAME}_debug
 
-ch_leak	:	${NAME}
-			leaks -atExit -- ./${NAME} ./maps/map1.ber
+debug_bonus	:
+				${CC} ${CFLAGS} -g ${B_SRCS} -L./libft -lmlx -lft \
+				-framework OpenGL -framework AppKit -o ${B_NAME}_debug
+
+all			:	${NAME} bonus
+
+re			:	fclean ${NAME}
+
+run			:	${NAME}
+				./${NAME} ./maps/map1.ber
+
+ch_leak		:	${NAME}
+				leaks -atExit -- ./${NAME} ./maps/map1.ber
