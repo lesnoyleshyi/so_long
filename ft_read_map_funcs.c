@@ -11,18 +11,14 @@
 /* ************************************************************************** */
 
 #include "so_long.h"
-#define	BUFFERSIZE 2
 #include "printf.h"
-
-char	**ft_get_big_map(int fd, char *str);
-char	**ft_read_map(const char *path_to_file);
-void	ft_close_fd_and_exit(int fd, const char *msg);
 
 t_map	*ft_get_map(const char *path_to_file)
 {
 	static t_map	map;
 	int				i;
 
+	ft_check_map_extension(path_to_file);
 	map.strings = ft_read_map(path_to_file);
 	i = 0;
 	printf("Map:\n");
@@ -41,48 +37,6 @@ t_map	*ft_get_map(const char *path_to_file)
 	printf("player start position: [%d][%d]\n", map.pl_pos_x, map.pl_pos_y);
 	printf("Collectibles count: %d\n", map.collectibles_count);
 	return (&map);
-}
-
-void	ft_get_player_pos(t_map *map)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (i < map->rows)
-	{
-		j = 0;
-		while (j < map->cols)
-		{
-			if (map->strings[i][j] == 'P' || map->strings[i][j] == 'p')
-			{
-				map->pl_pos_x = i;
-				map->pl_pos_y = j;
-				return ;
-			}
-			j++;
-		}
-		i++;
-	}
-}
-
-void	ft_count_collectibles(t_map *map)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (i < map->rows)
-	{
-		j = 0;
-		while (j < map->cols)
-		{
-			if (map->strings[i][j] == 'C' || map->strings[i][j] == 'c')
-				map->collectibles_count++;
-			j++;
-		}
-		i++;
-	}
 }
 
 char	**ft_read_map(const char *path_to_file)
