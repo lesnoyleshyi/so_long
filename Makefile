@@ -15,13 +15,16 @@ NAME	=	so_long
 
 HEADER	=	so_long.h
 
-MLX_LIB	=	libmlx.dylib
+MLX_LIB	=	./mlx/mlx_mms/libmlx.dylib
+
+LIBFT	=	./libft/libft.a
 
 SRCS	=	so_long.c	ft_read_map_funcs.c	ft_check_file_extension_funcs.c \
 			ft_move_funcs.c	ft_sprite_funcs.c ft_check_map_content_funcs.c \
 			ft_print_on_screen_funcs.c	ft_react_to_keys_funcs.c
 
-B_SRCS	=	${SRCS:.c=_bonus.c}
+B_SRCS	=	${SRCS:.c=_bonus.c} ft_move_enemies_funcs_bonus.c \
+								ft_create_enemy_funcs_bonus.c
 
 OBJS	=	${SRCS:.c=.o}
 
@@ -34,26 +37,38 @@ CFLAGS	=	-Wall -Werror -Wextra
 %.o			:	%.c	${HEADER}
 				${CC} ${CFLAGS} $< -I./mlx/mlx_mms -c -o $@
 
-.PHONY		:	all re clean fclean debug debug_bonus ch_leak run
+%_bonus.o	:	%_bonus.c	${HEADER}
+				${CC} ${CFLAGS} $< -I./mlx/mlx_mms -c -o $@
 
-${NAME}		:	${OBJS} ${MLX_LIB}
-				${CC} ${CFLAGS} -L./libft -lmlx -lft -framework OpenGL \
-				-framework AppKit ${OBJS} -o ${NAME}
+.PHONY		:	all re clean fclean debug debug_bonus ch_leak run libft
 
-bonus		:	${B_OBJS} ${MLX_LIB}
-				${CC} ${CFLAGS} -L./libft -lmlx -lft -framework OpenGL \
-				-framework AppKit ${B_OBJS} -o bonus
+${NAME}		:	${OBJS} ${MLX_LIB} ${LIBFT}
+				${CC} ${CFLAGS} ${OBJS} -L./libft -lmlx -lft \
+ 				-framework OpenGL -framework AppKit -o ${NAME}
 
-${MLX_LIB}	:
-				${MAKE} -C ./mlx/mlx_mms/
-				cp ./mlx/mlx_mms/libmlx.dylib ./
+bonus		:	${B_OBJS} ${MLX_LIB} ${LIBFT}
+				${CC} ${CFLAGS} ${B_OBJS} -L./libft -lmlx -lft \
+				-framework OpenGL -framework AppKit -o bonus
+
+${MLX_LIB}	:	libmlx ;
+
+libmlx		:
+				${MAKE} -C ./mlx/mlx_mms/ libmlx.dylib
+
+${LIBFT}	:	libft ;
+
+libft		:
+				${MAKE} -C ./libft
 
 clean		:
 				rm -rf ${OBJS} ${B_OBJS}
+				${MAKE} -C ./libft clean
+				${MAKE} -C ./mlx/mlx_mms/ clean
 
-fclean		:	clean
-				rm -rf ${NAME} ${B_NAME}
-
+fclean		:
+				rm -rf ${OBJS} ${B_OBJS} ${NAME} bonus ${MLX_LIB}
+				${MAKE} -C ./libft fclean
+				${MAKE} -C ./mlx/mlx_mms/ clean
 debug		:
 				${CC} ${CFLAGS} -g ${SRCS} -L./libft -lmlx -lft \
  				-framework OpenGL -framework AppKit -o ${NAME}_debug
@@ -69,5 +84,5 @@ re			:	fclean ${NAME}
 run			:	${NAME}
 				./${NAME} ./maps/map1.ber
 
-ch_leak		:	${NAME}
-				leaks -atExit -- ./${NAME} ./maps/map1.ber
+ch_leak		:	${NAME} bonus
+				leaks -atExit -- ./bonus ./maps/map1.ber

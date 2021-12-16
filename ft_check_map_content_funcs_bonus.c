@@ -1,31 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_check_map_content_funcs.c                       :+:      :+:    :+:   */
+/*   ft_check_map_content_funcs_bonus.c                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: stycho <stycho@student.21-school.ru>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 17:34:53 by stycho            #+#    #+#             */
-/*   Updated: 2021/12/15 17:34:54 by stycho           ###   ########.fr       */
+/*   Updated: 2021/12/16 16:38:57 by stycho           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 void	ft_check_map_symbols(t_map *map)
 {
-	int			i;
+	static int	i;
 	int			j;
 	static int	exit_count;
 	static int	players_count;
 
-	i = 0;
 	while (i < map->rows)
 	{
 		j = 0;
 		while (j < map->cols)
 		{
-			if (!(ft_strchr("01CEP", map->strings[i][j])))
+			if (!(ft_strchr("01CEPG", map->strings[i][j])))
 				ft_perror_and_exit("Error\nInvalid symbol in map\n");
 			if (map->strings[i][j] == 'E')
 				exit_count++;
@@ -33,6 +32,8 @@ void	ft_check_map_symbols(t_map *map)
 				map->collectibles_count++;
 			if (map->strings[i][j] == 'P')
 				players_count++;
+			if (map->strings[i][j] == 'G')
+				ft_create_enemy(map, i, j);
 			j++;
 		}
 		i++;

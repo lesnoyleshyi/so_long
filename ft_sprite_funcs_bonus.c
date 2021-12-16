@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_sprite_funcs.c                                  :+:      :+:    :+:   */
+/*   ft_sprite_funcs_bonus.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: stycho <stycho@student.21-school.ru>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 21:57:57 by stycho            #+#    #+#             */
-/*   Updated: 2021/12/14 21:57:59 by stycho           ###   ########.fr       */
+/*   Updated: 2021/12/16 16:46:32 by stycho           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 void	ft_get_sprites(t_data *data)
 {
@@ -19,7 +19,17 @@ void	ft_get_sprites(t_data *data)
 	data->collectible = ft_get_sprite(data, "./sprites/coin.xpm");
 	data->exit = ft_get_sprite(data, "./sprites/closed_exit.xpm");
 	data->open_exit = ft_get_sprite(data, "./sprites/open_exit.xpm");
-	data->hero = ft_get_sprite(data, "./sprites/player_right_0.xpm");
+	data->enemy = ft_get_sprite(data, "./sprites/enemy.xpm");
+	data->hero_up[0] = ft_get_sprite(data, "./sprites/player_up_0.xpm");
+	data->hero_up[1] = ft_get_sprite(data, "./sprites/player_up_1.xpm");
+	data->hero_down[0] = ft_get_sprite(data, "./sprites/player_down_0.xpm");
+	data->hero_down[1] = ft_get_sprite(data, "./sprites/player_down_1.xpm");
+	data->hero_right[0] = ft_get_sprite(data, "./sprites/player_right_0.xpm");
+	data->hero_right[1] = ft_get_sprite(data, "./sprites/player_right_1.xpm");
+	data->hero_left[0] = ft_get_sprite(data, "./sprites/player_left_0.xpm");
+	data->hero_left[1] = ft_get_sprite(data, "./sprites/player_left_1.xpm");
+	data->hero_orientation = data->hero_up;
+	data->hero = data->hero_orientation[0];
 }
 
 t_img	*ft_get_sprite(t_data *data, char *path_to_image)

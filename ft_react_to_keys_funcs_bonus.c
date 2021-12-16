@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_react_to_keys_funcs.c                           :+:      :+:    :+:   */
+/*   ft_react_to_keys_funcs_bonus.c                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: stycho <stycho@student.21-school.ru>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 21:54:32 by stycho            #+#    #+#             */
-/*   Updated: 2021/12/14 21:54:34 by stycho           ###   ########.fr       */
+/*   Updated: 2021/12/16 16:44:41 by stycho           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 int	ft_react_to_key(int keycode, t_data *data)
 {
@@ -28,6 +28,17 @@ int	ft_react_to_key(int keycode, t_data *data)
 		exit(0);
 	}
 	return (0);
+}
+
+void	ft_print_steps_count(int steps_count)
+{
+	char	*count;
+
+	count = ft_itoa(steps_count);
+	ft_putstr_fd("Players steps count: ", 1);
+	ft_putstr_fd(count, 1);
+	ft_putstr_fd("\n", 1);
+	free(count);
 }
 
 int	ft_react_to_close_win(t_data *data)

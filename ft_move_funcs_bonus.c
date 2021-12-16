@@ -1,19 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_move_funcs.c                                    :+:      :+:    :+:   */
+/*   ft_move_funcs_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: stycho <stycho@student.21-school.ru>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 21:26:11 by stycho            #+#    #+#             */
-/*   Updated: 2021/12/14 21:26:12 by stycho           ###   ########.fr       */
+/*   Updated: 2021/12/16 16:43:14 by stycho           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 void	ft_move_up(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_up;
+	if (map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == '1') ||
 	((map->strings[map->pl_pos_x - 1][map->pl_pos_y] == 'E') &&
 	map->collectibles_count != 0))
@@ -38,6 +41,9 @@ void	ft_move_up(t_map *map, t_data *data)
 
 void	ft_move_down(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_down;
+	if (map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == '1') ||
 	((map->strings[map->pl_pos_x + 1][map->pl_pos_y] == 'E') &&
 	map->collectibles_count != 0))
@@ -62,6 +68,9 @@ void	ft_move_down(t_map *map, t_data *data)
 
 void	ft_move_left(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_left;
+	if (map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == '1') ||
 	((map->strings[map->pl_pos_x][map->pl_pos_y - 1] == 'E') &&
 	map->collectibles_count != 0))
@@ -86,6 +95,9 @@ void	ft_move_left(t_map *map, t_data *data)
 
 void	ft_move_right(t_map *map, t_data *data)
 {
+	data->hero_orientation = data->hero_right;
+	if (map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'G')
+		exit(EXIT_SUCCESS);
 	if ((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == '1') ||
 	((map->strings[map->pl_pos_x][map->pl_pos_y + 1] == 'E') &&
 	map->collectibles_count != 0))

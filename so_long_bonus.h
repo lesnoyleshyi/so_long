@@ -12,7 +12,7 @@
 
 #ifndef SO_LONG_H
 # define SO_LONG_H
-# define BUFFERSIZE 100
+# define BUFFERSIZE 2
 # include "mlx/mlx_mms/mlx.h"
 # include "libft/libft.h"
 # include <fcntl.h>
@@ -26,6 +26,9 @@ typedef struct s_map {
 	int		collectibles_count;
 	int		pl_pos_x;
 	int		pl_pos_y;
+	int		enemy_pos_x[5];
+	int		enemy_pos_y[5];
+	int		enemy_count;
 	int		player_steps;
 }				t_map;
 
@@ -43,7 +46,13 @@ typedef struct s_data {
 	t_img	*collectible;
 	t_img	*exit;
 	t_img	*open_exit;
+	t_img	*hero_up[2];
+	t_img	*hero_down[2];
+	t_img	*hero_right[2];
+	t_img	*hero_left[2];
+	t_img	**hero_orientation;
 	t_img	*hero;
+	t_img	*enemy;
 	t_map	*map;
 }				t_data;
 
@@ -57,17 +66,26 @@ void	ft_check_map_extension(const char *path_to_file);
 void	ft_check_map_symbols(t_map *map);
 void	ft_free_array(char **array, int str_count);
 void	ft_perror_and_exit(const char *error_message);
+void	ft_create_enemy(t_map *map, int x_pos, int y_pos);
 void	ft_verify_symbols_count(int exits, int collectibles, int players);
 void	ft_print_sprite(t_data *data, char sprite_symb, int x_pos, int y_pos);
 void	ft_get_sprites(t_data *data);
 void	ft_get_player_pos(t_map *map);
 void	ft_check_is_enclosed(t_map map);
 void	ft_check_rectangularity(t_map *map);
+void	ft_change_sprite_state(t_data *data);
 void	ft_print_steps_count(int steps_count);
+void	ft_put_step_count_to_win(t_data *data);
 void	ft_move_up(t_map *map, t_data *data);
 void	ft_move_down(t_map *map, t_data *data);
 void	ft_move_left(t_map *map, t_data *data);
 void	ft_move_right(t_map *map, t_data *data);
+void	ft_change_enemies_pos(t_data *data);
+void	ft_move_enemy(t_map *map, t_data *data);
+void	ft_move_enemy_up(t_map *map, t_data *data);
+void	ft_move_enemy_down(t_map *map, t_data *data);
+void	ft_move_enemy_left(t_map *map, t_data *data);
+void	ft_move_enemy_right(t_map *map, t_data *data);
 int		ft_react_to_key(int keycode, t_data *data);
 int		ft_react_to_close_win(t_data *data);
 
